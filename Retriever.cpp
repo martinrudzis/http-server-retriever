@@ -36,13 +36,7 @@ int main(int argc, char **argv) {
    // Make a socket, bind it, and listen on it
    int clientSd = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
 
-   // Build our HTTP request using serverName and fileName
-   std::stringstream ss;
-   ss << "GET /" << fileName << " HTTP/1.1\r\n" << "Host: " << serverName << "\r\n" << "Accept-Language: en-us\r\n\r\n";
-   std::string request = ss.str();
-   std::cerr << request << std::endl;
-
-   // Avoid "Address alread in use" error
+   // Avoid "Address already in use" error
    int status = connect(clientSd, servinfo->ai_addr, servinfo->ai_addrlen);
    if (status < 0) {
       std::cerr << "Failed to connect to server." << std::endl;
@@ -50,11 +44,23 @@ int main(int argc, char **argv) {
       return -1;
    } 
 
+   // Build our HTTP request using serverName and fileName
+   std::string request = "GET /" + fileName + " HTTP/1.1\r\n" + "Connection: close\r\n" + "Host: " + serverName + "\r\n\r\n";
+   // std::stringstream ss;
+   // ss << "GET /" << fileName << " HTTP/1.1\r\n" << "Host: " << serverName << "\r\n\r\n";
+   // std::string request = ss.str();
+   // std::cerr << request << std::endl;
+
+   // Send request to server
+   // char databuf[] = request.c_str();
+   write(clientSd, request.c_str(), strlen(request.c_str()));
+   std::cerr << "Finished sending request to server" << std::endl;
+
    // Read server response 
    char c;
    while(read(clientSd, &c, sizeof(c)) > 0) { 
-      std::cerr << c << std::endl;
+      std::cerr << c;
    }
-   std::cerr << "Finished reading server response" << std::endl;
+   std::cerr << std::endl << "Finished reading server response" << std::endl;
    close(clientSd); // Close socket
 }
