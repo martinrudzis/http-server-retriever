@@ -15,7 +15,7 @@
 #include <sstream>
 #include <string>
 
-std::string serverPort = "80"; // Use port 80 for HTTP
+std::string serverPort = "1041"; // Use port 80 for HTTP
 
 int main(int argc, char **argv) {
    // Program arguments (specified in command line)
@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
    } 
 
    // Build our HTTP request using serverName and fileName
-   std::string request = "GET /" + fileName + " HTTP/1.1\r\n" + "Connection: close\r\n" + "Host: " + serverName + "\r\n\r\n";
+   std::string request = /*"GET /" +*/ fileName + " HTTP/1.1\r\n" + "Connection: close\r\n" + "Host: " + serverName + "\r\n\r\n";
    // std::stringstream ss;
    // ss << "GET /" << fileName << " HTTP/1.1\r\n" << "Host: " << serverName << "\r\n\r\n";
    // std::string request = ss.str();

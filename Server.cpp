@@ -9,35 +9,112 @@
 #include <sys/uio.h> // writev
 #include <cstring>
 #include <iostream>
+#include <fstream>
+#include <string>
 #include <pthread.h>
 #include <sys/time.h> 
 
-const int BUFSIZE = 1500;
+const std::string serverPort = "1041"; // server port number
 
 struct thread_data {
    int sd;
 };
 
+bool sendFileContent(std::string& content, const std::string& fileName, int sd) {
+   // struct thread_data *data = static_cast<thread_data*>(data_param);
+   std::string line;
+   std::ifstream fileStream;
+   fileStream.open(fileName);
+   if (fileStream.is_open()) {
+      // Send file
+      std::cout << "Successfully opened file" << std::endl;
+      while (getline(fileStream, line)) {
+         content += line + "\n";
+      }
+      fileStream.close();
+      std::cout << "The content requested is below:" << std::endl;
+      std::cout << content << std::endl;
+      std::cout << "The file requested is " << fileName << "." << std::endl;
+      std::string reply = "HTTP/1.1 200 OK\n\n" + content;
+      std::cerr << "The reply is " << reply << std::endl;
+      // char reply[] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello World!";
+      write(sd, reply.c_str(), strlen(reply.c_str()));
+      close(sd);
+      return true;
+   }
+   return false;
+}
+
 void *serverThreadFunction(void *data_param) {
    struct thread_data *data = static_cast<thread_data*>(data_param);
-   char databuf[BUFSIZE]; // Allocate buffer
-   int count = 0;
+   char buffer[1350];
+   read(data->sd, buffer, 1350);
+   std::cout << std::endl;
+   std::string fileName;
+   std::string request(buffer);
+   std::string content;
+   printf("%s\n",buffer);
 
-   read(data->sd, databuf, BUFSIZE;
+   // Check for valid request 
+   std::size_t get = request.find("GET ");
+   std::size_t version = request.find(" HTTP/1.1\r\n");
+   std::size_t firstLine = request.find("\r\n");
+   int fName = get + 5;
+   // Check that "GET" comes before "HTTP/1.1", that a file is requested, 
+   // and that "HTTP/1.1 is on the same line as "GET"
+   if (get != version && get < version && version < firstLine ) {
+      // Parse name of requested file
+      for (int i = fName; !isspace(request[i]); i++) {
+         fileName.push_back(request[i]);
+      }
+      if (fileName.find("../") != -1) {
+         // 403 Forbidden! Bad!
+         sendFileContent(content, "403.html", data->sd);
+      }
+      else if (fileName != "SecretFile.html") {
+         // Try to send requested file; if it can't be sent, it doesn't exist
+         if (!sendFileContent(content, fileName, data->sd)) {
+            // 404 Not found
+            sendFileContent(content, "404.html", data->sd);
+         }
+      }
+      else {
+         // 401 Unauthorized
+         sendFileContent(content, "401.html", data->sd);
+      }
+   }
+   else {
+      // 400 Bad request
+      sendFileContent(content, "400.html", data->sd);
+   }
+   // Parse name of requested file 
 
-   write(data->sd, &count, sizeof(count)); // Send number of reads to client as reponse
-
-   close(data->sd);
-
+   // int i, spaces = 0;
+   // while (spaces < 2) {
+   //    if (isspace(buffer[i++])) {
+   //       spaces++;
+   //    }
+   //    if (spaces >= 1 && spaces < 2) {
+   //       fileName.push_back(buffer[i]);
+   //    }
+   // }
+   // fileName = fileName.substr(1, fileName.length() - 2);
+   // Read for file
+   // std::ifstream fileStream;
+   // fileStream.open(fileName);
+   // std::string content, line;
+   // if (fileStream.is_open()) {
+   //    std::cout << "Successfully opened file" << std::endl;
+   //    while (getline(fileStream, line)) {
+   //       content += line + "\n";
+   //    }
+   // }
    free(data);
    return NULL;
 }
 
 int main(int argc, char **argv) {
-// Program arguments (specified in command line)
-   std::string serverPort = argv[1]; // server port number
-   int iterations = std::stoi(argv[2]); // number of reads
-// Create TCP socket listening on port
+   // Create TCP socket listening on port
    // Load address structs with getaddrinfo()
    struct addrinfo hints, *res; 
    memset(&hints, 0, sizeof(hints)); // 2. Clear struct data initially
@@ -59,23 +136,24 @@ int main(int argc, char **argv) {
    const int yes = 1;
    setsockopt(serverSd, SOL_SOCKET, SO_REUSEADDR, (char *)&yes, sizeof(yes));
 
-// Bind socket
+   // Bind socket
    if (bind(serverSd, res->ai_addr, res->ai_addrlen) < 0) {
       std::cout << "Error binding socket." << std::endl;
    }
 
    listen(serverSd, 50); // Listen to up to 50 concurrent connections
 
-// Accept incoming connection
    struct sockaddr_storage clientAddr;
    socklen_t clientAddrSize = sizeof(clientAddr);
+
    while (1) {
+      // Accept incoming connection
       int newSd = accept(serverSd, (struct sockaddr *)&clientAddr, &clientAddrSize);
       // Create a new thread to handle connection
       pthread_t newThread;
       struct thread_data *data = new thread_data;
-      data->iterations = iterations;
       data->sd = newSd;
       pthread_create(&newThread, NULL, serverThreadFunction, (void*) data);
    }
+   return 0;
 }
