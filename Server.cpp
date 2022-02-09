@@ -25,18 +25,22 @@ bool sendFileContent(std::string& content, const std::string& fileName, int sd) 
    std::ifstream fileStream;
    fileStream.open(fileName);
    if (fileStream.is_open()) {
+      // if content string is empty, then an error code wasn't added
+      if (content.length() == 0) {
+         content = "HTTP/1.1 200 OK\n\n";
+      }
       // Send file
       std::cout << "Successfully opened file" << std::endl;
       while (getline(fileStream, line)) {
          content += line + "\n";
       }
       fileStream.close();
-      std::cout << "The content requested is below:" << std::endl;
-      std::cout << content << std::endl;
+      // std::cout << "The content requested is below:" << std::endl;
+      // std::cout << content << std::endl;
       std::cout << "The file requested is " << fileName << "." << std::endl;
-      std::string reply = "HTTP/1.1 200 OK\n\n" + content;
-      std::cerr << "The reply is " << reply << std::endl;
-      write(sd, reply.c_str(), strlen(reply.c_str()));
+      // std::string reply = "HTTP/1.1 200 OK\n\n" + content;
+      std::cerr << "The reply is " << content << std::endl;
+      write(sd, content.c_str(), strlen(content.c_str()));
       close(sd);
       return true;
    }
@@ -65,20 +69,25 @@ void *serverThreadFunction(void *data_param) {
       for (int i = fName; !isspace(request[i]); i++) {
          fileName.push_back(request[i]);
       }
+      std::cout << "The file requested is " << fileName << std::endl;
       if (fileName.find("../") != -1) {
+         content = "HTTP/1.1 403 Forbidden\n\n";
          sendFileContent(content, "403.html", data->sd); // 403 Forbidden! Bad!
       }
       else if (fileName != "SecretFile.html") {
          // Try to send requested file; if it can't be sent, it doesn't exist
          if (!sendFileContent(content, fileName, data->sd)) {
+            content = "HTTP/1.1 404 Not Found\n\n";
             sendFileContent(content, "404.html", data->sd); // 404 Not found
          }
       }
       else {
+         content = "HTTP/1.1 401 Unauthorized\n\n";
          sendFileContent(content, "401.html", data->sd); // 401 Unauthorized
       }
    }
    else {
+      content = "HTTP/1.1 400 Bad Request\n\n";
       sendFileContent(content, "400.html", data->sd);  // 400 Bad request
    }
    free(data);
