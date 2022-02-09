@@ -12,7 +12,6 @@
 #include <fstream>
 #include <string>
 #include <pthread.h>
-#include <sys/time.h> 
 
 const std::string serverPort = "1041"; // server port number
 
@@ -37,7 +36,6 @@ bool sendFileContent(std::string& content, const std::string& fileName, int sd) 
       std::cout << "The file requested is " << fileName << "." << std::endl;
       std::string reply = "HTTP/1.1 200 OK\n\n" + content;
       std::cerr << "The reply is " << reply << std::endl;
-      // char reply[] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello World!";
       write(sd, reply.c_str(), strlen(reply.c_str()));
       close(sd);
       return true;
@@ -49,11 +47,11 @@ void *serverThreadFunction(void *data_param) {
    struct thread_data *data = static_cast<thread_data*>(data_param);
    char buffer[1350];
    read(data->sd, buffer, 1350);
-   std::cout << std::endl;
+   // std::cout << std::endl;
    std::string fileName;
    std::string request(buffer);
    std::string content;
-   printf("%s\n",buffer);
+   // printf("%s\n",buffer);
 
    // Check for valid request 
    std::size_t get = request.find("GET ");
@@ -68,52 +66,27 @@ void *serverThreadFunction(void *data_param) {
          fileName.push_back(request[i]);
       }
       if (fileName.find("../") != -1) {
-         // 403 Forbidden! Bad!
-         sendFileContent(content, "403.html", data->sd);
+         sendFileContent(content, "403.html", data->sd); // 403 Forbidden! Bad!
       }
       else if (fileName != "SecretFile.html") {
          // Try to send requested file; if it can't be sent, it doesn't exist
          if (!sendFileContent(content, fileName, data->sd)) {
-            // 404 Not found
-            sendFileContent(content, "404.html", data->sd);
+            sendFileContent(content, "404.html", data->sd); // 404 Not found
          }
       }
       else {
-         // 401 Unauthorized
-         sendFileContent(content, "401.html", data->sd);
+         sendFileContent(content, "401.html", data->sd); // 401 Unauthorized
       }
    }
    else {
-      // 400 Bad request
-      sendFileContent(content, "400.html", data->sd);
+      sendFileContent(content, "400.html", data->sd);  // 400 Bad request
    }
-   // Parse name of requested file 
-
-   // int i, spaces = 0;
-   // while (spaces < 2) {
-   //    if (isspace(buffer[i++])) {
-   //       spaces++;
-   //    }
-   //    if (spaces >= 1 && spaces < 2) {
-   //       fileName.push_back(buffer[i]);
-   //    }
-   // }
-   // fileName = fileName.substr(1, fileName.length() - 2);
-   // Read for file
-   // std::ifstream fileStream;
-   // fileStream.open(fileName);
-   // std::string content, line;
-   // if (fileStream.is_open()) {
-   //    std::cout << "Successfully opened file" << std::endl;
-   //    while (getline(fileStream, line)) {
-   //       content += line + "\n";
-   //    }
-   // }
    free(data);
    return NULL;
 }
 
 int main(int argc, char **argv) {
+   std::string serverPort = argv[1]; // Use port 1041 on linux lab machines
    // Create TCP socket listening on port
    // Load address structs with getaddrinfo()
    struct addrinfo hints, *res; 

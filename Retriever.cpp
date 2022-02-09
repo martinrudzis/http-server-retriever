@@ -10,17 +10,16 @@
 #include <cstring>
 #include <iostream>
 #include <stdio.h>
-#include <sys/time.h> 
 #include <errno.h>
 #include <sstream>
 #include <string>
 
-std::string serverPort = "1041"; // Use port 80 for HTTP
 
 int main(int argc, char **argv) {
    // Program arguments (specified in command line)
    std::string serverName = argv[1]; // server host name or IP
    std::string fileName = argv[2]; // name of file to retrieve
+   std::string serverPort = argv[3]; // Use port 80 for HTTP
 
    // Create new socket
    // Load address structs with getaddrinfo()
@@ -45,11 +44,11 @@ int main(int argc, char **argv) {
    } 
 
    // Build our HTTP request using serverName and fileName
-   std::string request = /*"GET /" +*/ fileName + " HTTP/1.1\r\n" + "Connection: close\r\n" + "Host: " + serverName + "\r\n\r\n";
+   std::string request = "GET /" + fileName + " HTTP/1.1\r\n" + "Connection: close\r\n" + "Host: " + serverName + "\r\n\r\n";
    // std::stringstream ss;
    // ss << "GET /" << fileName << " HTTP/1.1\r\n" << "Host: " << serverName << "\r\n\r\n";
    // std::string request = ss.str();
-   // std::cerr << request << std::endl;
+   std::cerr << request << std::endl;
 
    // Send request to server
    // char databuf[] = request.c_str();
@@ -57,6 +56,11 @@ int main(int argc, char **argv) {
    std::cerr << "Finished sending request to server" << std::endl;
 
    // Read server response 
+   // char buffer[2500];
+   // read(clientSd, &buffer, sizeof(buffer));
+   // buffer[2500] = '\0';
+   // std::string response(buffer);
+   // std::cerr << response;
    char c;
    while(read(clientSd, &c, sizeof(c)) > 0) { 
       std::cerr << c;
