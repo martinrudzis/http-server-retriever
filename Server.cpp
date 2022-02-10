@@ -28,7 +28,6 @@ bool sendFileContent(std::string& content, const std::string& fileName, int sd) 
          content = "HTTP/1.1 200 OK\n\n";
       }
       // Send file
-      std::cout << "Successfully opened file" << std::endl;
       while (getline(fileStream, line)) {
          content += line + "\n";
       }
@@ -63,7 +62,6 @@ void *serverThreadFunction(void *data_param) {
       for (int i = fName; !isspace(request[i]); i++) {
          fileName.push_back(request[i]);
       }
-      std::cout << "The file requested is " << fileName << std::endl;
       if (static_cast<int>(fileName.find("../")) != -1) {
          content = "HTTP/1.1 403 Forbidden\n\n";
          sendFileContent(content, "403.html", data->sd); // 403 Forbidden! Bad!
