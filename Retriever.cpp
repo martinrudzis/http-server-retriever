@@ -47,6 +47,7 @@ int main(int argc, char **argv) {
    // Build our HTTP request using serverName and fileName
    std::string request = "GET /" + fileName + " HTTP/1.1\r\n" + "Connection: close\r\n" + "Host: " + serverName + "\r\n\r\n";
 
+
    // Send request to server
    write(clientSd, request.c_str(), strlen(request.c_str()));
 

@@ -10,9 +10,6 @@ else
    echo "result was: '$firstline'"
 fi
 
-# Start server listening on port 1041
-# ./server "1041"
-
 # Retriever accessing a file from my server
 ./retriever "csslab12h.uwb.edu" "file1.txt" "1041" &> test3result.txt
 if grep -q "HTTP/1.1 200 OK" "test3result.txt" ; then 
