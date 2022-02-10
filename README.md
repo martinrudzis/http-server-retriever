@@ -24,7 +24,7 @@ Compilation:
 Execution:
 	To run individually, use ./server [serverPort]
 
-Makefile and Test Script
+Makefile and Test Script:
 Makefile:
 Compiles the server and retriever source files, Server.cpp and Retriever.cpp, using g++ with the following flags: -std=c++14 -g -Wall -Wextra for both. The Server.cpp is compiled with the additional -pthread flag to allow multithreading. The executables are titled  “server” and “retriever''.” 
 Execution: 
