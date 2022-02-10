@@ -1,7 +1,7 @@
 SERVER_EXE = server
 SERVER_SOURCES = Server.cpp
 RETRIEVER_EXE = retriever
-RETRIEVER_SOURCES = retriever.cpp
+RETRIEVER_SOURCES = Retriever.cpp
 
 CC = g++
 CXXFLAGS = -std=c++14 -g -Wall -Wextra

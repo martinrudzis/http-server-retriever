@@ -17,6 +17,7 @@
 
 int main(int argc, char **argv) {
    // Program arguments (specified in command line)
+   (void)argc; // Remove unused parameter warning
    std::string serverName = argv[1]; // server host name or IP
    std::string fileName = argv[2]; // name of file to retrieve
    std::string serverPort = argv[3]; // Use port 80 for HTTP
@@ -48,23 +49,30 @@ int main(int argc, char **argv) {
    // std::stringstream ss;
    // ss << "GET /" << fileName << " HTTP/1.1\r\n" << "Host: " << serverName << "\r\n\r\n";
    // std::string request = ss.str();
-   std::cerr << request << std::endl;
+
+   // std::cerr << request << std::endl;
 
    // Send request to server
    // char databuf[] = request.c_str();
    write(clientSd, request.c_str(), strlen(request.c_str()));
-   std::cerr << "Finished sending request to server" << std::endl;
 
    // Read server response 
-   // char buffer[2500];
-   // read(clientSd, &buffer, sizeof(buffer));
-   // buffer[2500] = '\0';
+   // char buffer[1350];
+   // read(clientSd, buffer, 1350);
+   // // buffer[20] = '\0';
+
+   // std::string response(buffer);
+   // std::istringstream input(response); 
+   // std::string firstLine;
+   // std::getline(input,firstLine);
+
+   // std::cout << "The first line is " << firstLine;
+
    // std::string response(buffer);
    // std::cerr << response;
    char c;
-   while(read(clientSd, &c, sizeof(c)) > 0) { 
+   while(c != '\n' && read(clientSd, &c, sizeof(c)) > 0) { 
       std::cerr << c;
    }
-   std::cerr << std::endl << "Finished reading server response" << std::endl;
    close(clientSd); // Close socket
 }

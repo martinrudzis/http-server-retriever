@@ -10,10 +10,11 @@
 #include <cstring>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <pthread.h>
 
-const std::string serverPort = "1041"; // server port number
+// const std::string serverPort = "1041"; // server port number
 
 struct thread_data {
    int sd;
@@ -57,20 +58,24 @@ void *serverThreadFunction(void *data_param) {
    std::string content;
    // printf("%s\n",buffer);
 
-   // Check for valid request 
-   std::size_t get = request.find("GET ");
-   std::size_t version = request.find(" HTTP/1.1\r\n");
-   std::size_t firstLine = request.find("\r\n");
+   // Check for valid request
+   std::istringstream input(request); 
+   std::string firstLine;
+   std::getline(input,firstLine);
+   int get = firstLine.find("GET ");
+   int version = firstLine.find(" HTTP/1.1");
+   // std::size_t firstLine = request.find("\n");
    int fName = get + 5;
    // Check that "GET" comes before "HTTP/1.1", that a file is requested, 
    // and that "HTTP/1.1 is on the same line as "GET"
-   if (get != version && get < version && version < firstLine ) {
+   // if (get != version - 9 && get < version && version < firstLine ) {
+   if (get != -1 && version != -1 && fName < version - 8) {
       // Parse name of requested file
       for (int i = fName; !isspace(request[i]); i++) {
          fileName.push_back(request[i]);
       }
       std::cout << "The file requested is " << fileName << std::endl;
-      if (fileName.find("../") != -1) {
+      if (static_cast<int>(fileName.find("../")) != -1) {
          content = "HTTP/1.1 403 Forbidden\n\n";
          sendFileContent(content, "403.html", data->sd); // 403 Forbidden! Bad!
       }
@@ -95,6 +100,8 @@ void *serverThreadFunction(void *data_param) {
 }
 
 int main(int argc, char **argv) {
+   // Program arguments (specified in command line)
+   (void)argc; // Remove unused parameter warning
    std::string serverPort = argv[1]; // Use port 1041 on linux lab machines
    // Create TCP socket listening on port
    // Load address structs with getaddrinfo()
