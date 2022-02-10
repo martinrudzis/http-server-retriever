@@ -14,14 +14,11 @@
 #include <string>
 #include <pthread.h>
 
-// const std::string serverPort = "1041"; // server port number
-
 struct thread_data {
    int sd;
 };
 
 bool sendFileContent(std::string& content, const std::string& fileName, int sd) {
-   // struct thread_data *data = static_cast<thread_data*>(data_param);
    std::string line;
    std::ifstream fileStream;
    fileStream.open(fileName);
@@ -36,11 +33,6 @@ bool sendFileContent(std::string& content, const std::string& fileName, int sd) 
          content += line + "\n";
       }
       fileStream.close();
-      // std::cout << "The content requested is below:" << std::endl;
-      // std::cout << content << std::endl;
-      std::cout << "The file requested is " << fileName << "." << std::endl;
-      // std::string reply = "HTTP/1.1 200 OK\n\n" + content;
-      std::cerr << "The reply is " << content << std::endl;
       write(sd, content.c_str(), strlen(content.c_str()));
       close(sd);
       return true;
@@ -68,7 +60,6 @@ void *serverThreadFunction(void *data_param) {
    int fName = get + 5;
    // Check that "GET" comes before "HTTP/1.1", that a file is requested, 
    // and that "HTTP/1.1 is on the same line as "GET"
-   // if (get != version - 9 && get < version && version < firstLine ) {
    if (get != -1 && version != -1 && fName < version - 8) {
       // Parse name of requested file
       for (int i = fName; !isspace(request[i]); i++) {
