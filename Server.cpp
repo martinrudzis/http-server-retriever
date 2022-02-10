@@ -44,11 +44,9 @@ void *serverThreadFunction(void *data_param) {
    struct thread_data *data = static_cast<thread_data*>(data_param);
    char buffer[1350];
    read(data->sd, buffer, 1350);
-   // std::cout << std::endl;
    std::string fileName;
    std::string request(buffer);
    std::string content;
-   // printf("%s\n",buffer);
 
    // Check for valid request
    std::istringstream input(request); 
