@@ -1,5 +1,7 @@
 Documentation
 
+This project creates an http server can be accessed from a web browser. Code is also included for a simple client program that can send http requests and receive data from real web servers.
+
 Retriever
 Methods:
 Main: Accepts the remote host to connect to, the file to request, and the remote port number as command line arguments. Creates a socket that connects to the remote host and writes an HTTP GET request to it. It then reads the server response character-by-character and prints the server reply to the console.
